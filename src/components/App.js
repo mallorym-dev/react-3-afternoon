@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-
 import './App.css';
+import axios from 'axios'
 
 import Header from './Header/Header';
 import Compose from './Compose/Compose';
+import Post from './Post/Post'
 
 class App extends Component {
   constructor() {
@@ -13,25 +14,35 @@ class App extends Component {
       posts: []
     };
 
-    this.updatePost = this.updatePost.bind( this );
-    this.deletePost = this.deletePost.bind( this );
-    this.createPost = this.createPost.bind( this );
+    this.updatePost = this.updatePost.bind(this);
+    this.deletePost = this.deletePost.bind(this);
+    this.createPost = this.createPost.bind(this);
   }
-  
+
   componentDidMount() {
-
+    axios.get('https://practiceapi.devmountain.com/api/posts').then(results => {
+      this.setState({ posts: results.data })
+    })
   }
 
-  updatePost() {
-  
+  updatePost(id, text) {
+    axios.put(`https://practiceapi.devmountain.com/api/posts?id = ${id}`, { text }).then(results => {
+      this.setState({ posts: results.data })
+    })
   }
 
-  deletePost() {
-
+  deletePost(id) {
+    axios.delete(`https://practiceapi.devmountain.com/api/posts?id = ${id}`).then(results => {
+      this.setState({ posts: results.data })
+    })
   }
 
-  createPost() {
-
+  createPost(text) {
+    console.log(text)
+    axios.post('https://practiceapi.devmountain.com/api/posts', { text }).then(results => {
+      console.log(results)
+      this.setState({ posts: results.data })
+    })
   }
 
   render() {
@@ -43,8 +54,19 @@ class App extends Component {
 
         <section className="App__content">
 
-          <Compose />
-          
+          <Compose createPostFn={this.createPost} />
+          {
+            posts.map(post => {
+              console.log(post)
+              return <Post key={post.id}
+                text={post.text}
+                date={post.date}
+                updatePostFn={post.updatePost}
+                id={post.id}
+                deletePostFn={post.deletePost} />
+            })}
+          }
+
         </section>
       </div>
     );
